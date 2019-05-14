@@ -50,6 +50,7 @@
         - vim
         - npm
         - hub
+        - python-pip3
 
   - name: Install typescript
     npm:
