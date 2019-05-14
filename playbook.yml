@@ -48,7 +48,13 @@
         - conda
         - code
         - vim
-      update_cache: yes
+        - npm
+        - hub
+
+  - name: Install typescript
+    npm:
+      name: typescript
+      global: yes
 
   # This requires a new login shell to test
   - name: Source conda conda 
