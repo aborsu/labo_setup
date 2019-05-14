@@ -1,0 +1,58 @@
+---
+- hosts: localhost
+  become: true
+  become_user: root
+  tasks:
+  - name: Install GPG key for SubLimeText
+    apt_key:
+      url: https://download.sublimetext.com/sublimehq-pub.gpg
+      state: present
+
+  - name: Install GPG key for VSCode
+    apt_key:
+      url: https://packages.microsoft.com/keys/microsoft.asc
+      state: present
+
+  - name: Install GPG key for conda
+    apt_key:
+      url: https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
+      state: present
+
+  - name: Add specified repositories into sources list using specified filename
+    apt_repository:
+      repo: deb {{ item.repo }} {{ item.add }}
+      state: present
+      filename: "{{ item.file }}"
+    with_items:
+      - repo: https://download.sublimetext.com/
+        add: apt/stable/
+        file: sublime
+      - repo: https://packages.microsoft.com/repos/vscode/
+        add: stable main
+        file: vscode
+      - repo: https://repo.anaconda.com/pkgs/misc/debrepo/conda/
+        add: stable main
+        file: conda
+
+  - name: Install snaps 
+    command: snap install {{item}} --classic
+    with_items:
+      - pycharm-community
+      - webstorm
+
+  - name: Install packages
+    apt:
+      state: installed
+      pkg: 
+        - sublime-text
+        - conda
+        - code
+        - vim
+      update_cache: yes
+
+  # This requires a new login shell to test
+  - name: Source conda conda 
+    file:
+     src: "/opt/conda/etc/profile.d/conda.sh"
+     dest: "/etc/profile.d/conda.sh"
+     state: link
