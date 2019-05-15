@@ -3,21 +3,15 @@
   become: true
   become_user: root
   tasks:
-  - name: Install GPG key for SubLimeText
+  - name: Install GPG keys
     apt_key:
-      url: https://download.sublimetext.com/sublimehq-pub.gpg
+      url: "{{item}}"
       state: present
-
-  - name: Install GPG key for VSCode
-    apt_key:
-      url: https://packages.microsoft.com/keys/microsoft.asc
-      state: present
-
-  - name: Install GPG key for conda
-    apt_key:
-      url: https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
-      state: present
-
+    with_items:
+      - https://download.sublimetext.com/sublimehq-pub.gpg
+      - https://repo.anaconda.com/pkgs/misc/gpgkeys/anaconda.asc
+      - https://packages.microsoft.com/keys/microsoft.asc
+      
   - name: Add specified repositories into sources list using specified filename
     apt_repository:
       repo: deb {{ item.repo }} {{ item.add }}
@@ -34,6 +28,10 @@
         add: stable main
         file: conda
 
+  - name: Enable nvidia driver repo
+    apt_repository:
+      repo: ppa:nginx/stable
+
   - name: Install snaps 
     command: snap install {{item}} --classic
     with_items:
@@ -44,13 +42,23 @@
     apt:
       state: installed
       pkg: 
-        - sublime-text
-        - conda
         - code
-        - vim
-        - npm
+        - conda
+        - docker.io
         - hub
-        - python-pip3
+        - npm
+        - python3-pip
+        - sublime-text
+        - vim
+        - dkms 
+        - build-essential
+        - nvidia-driver-418
+
+  - name: Enable docker on startup
+    systemd:
+      name: docker
+      enabled: yes
+      state: started
 
   - name: Install typescript
     npm:
